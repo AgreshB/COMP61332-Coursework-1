@@ -1,6 +1,9 @@
 
-class BagOfWords(object):
+from classifier import Classifier
+
+class BagOfWords(Classifier):
     def __init__(self, config):
+        Classifier.__init__(self,config)
         self.config = config
 
     def train(self):

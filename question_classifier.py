@@ -32,11 +32,9 @@ def main(argv):
     modelString = config.get('MODEL', 'Model')
     
     if modelString == 'bow':
-        #BagOfWords(config, train, test)
         model = BagOfWords(config)
     elif modelString == 'bilstm':
         model = BiLSTM(config)
-        #BiLSTM(config, train, test)
     else:
         print('Error choosing model! Model is currently: ',model)
 

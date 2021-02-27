@@ -1,12 +1,14 @@
+from classifier import Classifier
 
-class BiLSTM(object):
+class BiLSTM(Classifier):
     def __init__(self, config):
+        Classifier.__init__(self,config)
         self.config = config
 
     def train(self):
-        print("BoW: Training begun...")
+        print("BiLSTM: Training begun...")
         #TODO: BoW
-        print("BoW: Training complete!")
+        print("BiLSTM: Training complete!")
 
     def test(self):
-        print("BoW: Test results:")
+        print("BiLSTM: Test results:")
