@@ -1,24 +1,8 @@
 
 import sys, getopt
 import configparser
-
-def BagOfWords(config, train, test):
-    if(train):
-        print("BoW: Training begun...")
-        #TODO: BoW
-        print("BoW: Training complete!")
-    if(test):
-        print("BoW: Test results:")
-        #TODO: Print results
-
-def BiLSTM(config, train, test):
-    if(train):
-        print("BiLSTM: Training begun...")
-        #TODO: BiLSTM
-        print("BiLSTM: Training complete!")
-    if(test):
-        print("BiLSTM: Test results:")
-        #TODO: Print results
+from bilstm import BiLSTM
+from bag_of_words import BagOfWords
 
 
 def main(argv):
@@ -45,14 +29,20 @@ def main(argv):
     
     config = configparser.ConfigParser()
     config.read(configfile)
-    model = config.get('MODEL', 'Model')
-    if model == 'bow':
-        print(model)
-        BagOfWords(config, train, test)
-    elif model == 'bilstm':
-        BiLSTM(config, train, test)
+    modelString = config.get('MODEL', 'Model')
+    
+    if modelString == 'bow':
+        #BagOfWords(config, train, test)
+        model = BagOfWords(config)
+    elif modelString == 'bilstm':
+        model = BiLSTM(config)
+        #BiLSTM(config, train, test)
     else:
         print('Error choosing model! Model is currently: ',model)
 
+    if(train):
+        model.train()
+    if(test):
+        model.test()
 if __name__ == "__main__":
    main(sys.argv[1:])
