@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # creating list of stop words from Stop_words.txt
 STOP_WORDS = []
-with open("Stop_words.txt") as f:
+with open("res/stop_words.txt") as f:
     for line in f:
         STOP_WORDS.append(line.strip())
 
@@ -31,24 +31,23 @@ def remove_punc(word_list):
     return list_without_punc
 
 
-# Wraper function that uses all functionality above on a sentance 
-def process_sentance(sentance):
+# Wraper function that uses all functionality above on a sentence 
+def process_sentence(sentence):
     #first tokenize 
-    tokens = split_tokenize(sentance)
+    tokens = split_tokenize(sentence)
     #strips puncuation and stop words
     token_without_punc = remove_punc(tokens)
     clean_tokens = remove_stop(token_without_punc)
-
     return clean_tokens
 
 # Function for creating Vocabulary
 # Takes array of questions
-# returns list of all words (no duplciates)
+# returns list of all words (no duplicates)
 def create_vocab(data):
     #creating set in order to avoid duplicates
     vocab = set()
     for x in data:
-        clean_x = process_sentance(x)
+        clean_x = process_sentence(x)
         vocab.update(clean_x)
     return list(vocab)
 
