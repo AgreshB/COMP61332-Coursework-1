@@ -10,12 +10,9 @@ from preprocessing import process_sentence
 
 class BoWTextClassifierModule(nn.Module):
     def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
-        super().__init__()        
-        voc_size = text_field_vocab
-        n_classes = class_field_vocab
-       
-        self.embedding = nn.Embedding(voc_size, emb_dim)
-        self.top_layer = nn.Linear(emb_dim, n_classes)
+        super().__init__()
+        self.embedding = nn.Embedding(text_field_vocab, emb_dim, padding_idx = 0)
+        self.top_layer = nn.Linear(emb_dim, class_field_vocab)
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, docs):
@@ -96,15 +93,17 @@ class BagOfWords(Classifier):
         return n_correct, loss_function(scores, correct).item()
 
     def train(self):
-        print("BoW: Training begun...")
+        print("BoW: Training began...")
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         label, data, label_vocab, data_vocab = read_data(self.train_filename)
 
         # Create tensors
         data_array = np.zeros([len(data),len(max(data,key = lambda x: len(x)))], dtype = np.int64)
         for i,j in enumerate(data):
             data_array[i][0:len(j)] = j
-        data_array = torch.from_numpy(data_array)
-        label_array = torch.from_numpy(np.array(label, dtype = np.int64))
+        data_array = torch.from_numpy(data_array).to(device)
+        label_array = torch.from_numpy(np.array(label, dtype = np.int64)).to(device)
         
         # Split training and validation 90/10
         validation_split = .1
