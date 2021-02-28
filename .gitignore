@@ -10,6 +10,8 @@ log.log
 *.noseids
 .nyc_output
 .vscode-test
+.vscode
+venv
 __pycache__
 npm-debug.log
 **/.mypy_cache/**
