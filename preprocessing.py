@@ -163,25 +163,17 @@ def preprocess_pipeline(file_path: str):
 
 
 def reload_preprocessed():
-    labels = []
-    sentences = []
-    vocabulary = []
-    vocabulary_embed = []
-    sentence_representation = []
-    label_index = {}
-    label_representation = []
+    to_load = {
+        'labels': [], 
+        'sentences': [], 
+        'vocabulary': [],
+        'vocabulary_embed': [],
+        'sentence_representation': [],
+        'label_index': {},
+        'label_representation': []
+    }
 
-    to_load = [
-        [labels, 'labels'], 
-        [sentences, 'sentences'], 
-        [vocabulary, 'vocabulary'],
-        [vocabulary_embed, 'vocabulary_embed'],
-        [sentence_representation, 'sentence_representation'],
-        [label_index, 'label_index'],
-        [label_representation, 'label_representation']
-    ]
+    for loaded in to_load.keys():
+        to_load[loaded] = torch.load(f"data/{loaded}.bin")
 
-    for bin_load in to_load:
-        bin_load[0] = torch.load(f"data/{bin_load[1]}.bin")
-
-    return labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation
+    return to_load['labels'], to_load['sentences'], to_load['vocabulary'], to_load['vocabulary_embed'], to_load['sentence_representation'], to_load['label_index'], to_load['label_representation']
