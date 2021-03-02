@@ -9,8 +9,8 @@ if not load_trained:
 labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation = reload_preprocessed()
 
 # define train test split
-train_qty = int(0.9 * len(sentence_representation))
-validation_qty = len(sentence_representation) - train_qty
+train_qty = int(0.9 * len(labels))
+validation_qty = len(labels) - train_qty
 
 torch.manual_seed(0)
 
@@ -19,12 +19,12 @@ train_data, validation_data = torch.utils.data.random_split(labelled_data, [trai
 
 x_train, y_train = [], []
 
-for i in range(train_qty):
-    x_train.append(train_data[i][0])
-    y_train.append(train_data[i][1])
+for train_dp in train_data:
+    x_train.append(train_dp[0])
+    y_train.append(train_dp[1])
 
 x_validation, y_validation = [], []
 
-for i in range(validation_qty):
-    x_validation.append(validation_data[i][0])
-    y_validation.append(validation_data[i][1])
+for val_dp in validation_data:
+    x_validation.append(val_dp[0])
+    y_validation.append(val_dp[1])
