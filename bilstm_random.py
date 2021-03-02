@@ -18,3 +18,44 @@ class BilstmRandom(torch.nn.Module):
         self.feedforwardnet = Feedforward((2 * self.hidden_zie), self.forward_hidden_zie, self.forward_output_size)
 
         self.log_softmax = torch.nn.LogSoftmax(dim=1)
+
+    def forward(self, x, l):
+        embed = self.embedLayer(x)
+        pack_padded = torch.nn.utils.rnn.pack_padded_sequence(embed, l, enforce_sorted=False)
+
+        pack_output, _ = self.bilstm(pack_padded)
+        bilstm_output, _ = torch.nn.utils.rnn.pad_packed_sequence(pack_output)
+        bilstm_output_size = bilstm_output.size()[1]
+
+        # calculate mean of (re)padded vectors
+        for i in range(0, bilstm_output_size):
+            if i == 0:
+                vector = bilstm_output.index_select(
+                    1,
+                    torch.tensor(i)
+                ).squeeze(
+                    1
+                ).index_select(
+                    0,
+                    torch.tensor(l[i] - 1)
+                ).mean(
+                    dim=1
+                ).unsqueeze(0)
+            else:
+                vector = torch.cat((vector, bilstm_output.index_select(
+                        1,
+                        torch.tensor(i)
+                    ).squeeze(
+                        1
+                    ).index_select(
+                        0,
+                        torch.tensor(l[i] - 1)
+                    ).mean(
+                        dim=0
+                    ).unsqueeze(0)), 
+                    0
+                )
+
+        forwardfeednn = self.feedforwardnet(vector)
+
+        return self.log_softmax(forwardfeednn)
