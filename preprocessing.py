@@ -56,7 +56,6 @@ def create_vocab(data):
     vocab = set()
     for x in data:
         # clean_x = process_sentence(x)
-        print(x)
         vocab.update(x.split())
     return list(vocab)
 
@@ -88,6 +87,7 @@ def create_sentence_representation(sentences, vocab, vocab_embeddings):
             else:
                 sr.append(len(vocab_embeddings) - 1)
         sentence_rep.append(torch.tensor(sr))
+    return sentence_rep
 
 def create_labels_index_representation(labels):
     label_indices = {}
@@ -147,10 +147,41 @@ def preprocess_pipeline(file_path: str):
 
     # generate label indices and label representation
     label_index, label_representation = create_labels_index_representation(labels)
+    
+    to_save = [
+        (labels, 'labels'), 
+        (sentences, 'sentences'), 
+        (vocabulary, 'vocabulary'),
+        (vocabulary_embed, 'vocabulary_embed'),
+        (sentence_representation, 'sentence_representation'),
+        (label_index, 'label_index'),
+        (label_representation, 'label_representation')
+    ]
+
+    for bin_save in to_save:
+        torch.save(bin_save[0], f"data/{bin_save[1]}.bin")
+
+
+def reload_preprocessed():
+    labels = []
+    sentences = []
+    vocabulary = []
+    vocabulary_embed = []
+    sentence_representation = []
+    label_index = {}
+    label_representation = []
+
+    to_load = [
+        [labels, 'labels'], 
+        [sentences, 'sentences'], 
+        [vocabulary, 'vocabulary'],
+        [vocabulary_embed, 'vocabulary_embed'],
+        [sentence_representation, 'sentence_representation'],
+        [label_index, 'label_index'],
+        [label_representation, 'label_representation']
+    ]
+
+    for bin_load in to_load:
+        bin_load[0] = torch.load(f"data/{bin_load[1]}.bin")
 
     return labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation
-
-
-labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation = preprocess_pipeline("res/train_5500.label")
-
-print(vocabulary)
