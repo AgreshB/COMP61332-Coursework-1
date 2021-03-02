@@ -56,7 +56,8 @@ def create_vocab(data):
     vocab = set()
     for x in data:
         # clean_x = process_sentence(x)
-        vocab.update(x)
+        print(x)
+        vocab.update(x.split())
     return list(vocab)
 
 def create_embeddings(vocab):
@@ -152,4 +153,4 @@ def preprocess_pipeline(file_path: str):
 
 labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation = preprocess_pipeline("res/train_5500.label")
 
-print(sentences)
+print(vocabulary)
