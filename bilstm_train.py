@@ -1,6 +1,7 @@
 import torch
 from preprocessing import preprocess_pipeline, reload_preprocessed
 from bilstm_random import BilstmRandom
+from bilstm_pretrain import BilstmPretrain
 from concat_dataset import ConcatDataset
 from torch.utils.data.dataloader import DataLoader
 import numpy as np
@@ -61,10 +62,17 @@ concat_validation = ConcatDataset((x_validation, y_validation))
 dataloader_validation = DataLoader(concat_validation, batch_size=config["batch_size"], collate_fn=qc_collate_fn_bilstm)
 
 # initialise model
-model = BilstmRandom(
-    input_size=config['embed_dim'],
+# model = BilstmRandom(
+#     input_size=config['embed_dim'],
+#     hidden_zie=config['bilstm_hidden_size'],
+#     vocabulary_size=len(vocabulary) + 1,
+#     forward_hidden_zie=config['hidden_size'],
+#     forward_output_size=len(label_index)
+# )
+
+model = BilstmPretrain(
+    embed=torch.FloatTensor(vocabulary_embed),
     hidden_zie=config['bilstm_hidden_size'],
-    vocabulary_size=len(vocabulary) + 1,
     forward_hidden_zie=config['hidden_size'],
     forward_output_size=len(label_index)
 )
