@@ -1,8 +1,9 @@
 import torch
+import torch.nn as nn
 from feedforward import Feedforward
 
-class BilstmRandom(torch.nn.Module):
-    def __init__(self, input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad=False):
+class BilstmRandom(nn.Module):
+    def __init__(self, input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad=True):
         super(BilstmRandom, self).__init__()
         self.input_size = input_size
         self.hidden_zie = hidden_zie
@@ -10,11 +11,13 @@ class BilstmRandom(torch.nn.Module):
         self.forward_output_size = forward_output_size
         self.enable_grad = enable_grad
         self.vocabulary_size = vocabulary_size
+        
+        print(vocabulary_size, input_size, hidden_zie, forward_hidden_zie, forward_output_size)
 
-        self.embedLayer = torch.nn.Embedding(self.vocabulary_size, self.input_size)
+        self.embedLayer = nn.Embedding(self.vocabulary_size, self.input_size)
         self.embedLayer.weight.requires_grad = self.enable_grad
 
-        self.bilstm = torch.nn.LSTM(self.input_size, self.hidden_zie, bidirectional=True)
+        self.bilstm = nn.LSTM(self.input_size, self.hidden_zie, bidirectional=True)
         self.feedforwardnet = Feedforward((2 * self.hidden_zie), self.forward_hidden_zie, self.forward_output_size)
 
         self.log_softmax = torch.nn.LogSoftmax(dim=1)
@@ -30,31 +33,13 @@ class BilstmRandom(torch.nn.Module):
         # calculate mean of (re)padded vectors
         for i in range(0, bilstm_output_size):
             if i == 0:
-                vector = bilstm_output.index_select(
-                    1,
-                    torch.tensor(i)
-                ).squeeze(
-                    1
-                ).index_select(
-                    0,
-                    torch.tensor(l[i] - 1)
-                ).mean(
-                    dim=1
-                ).unsqueeze(0)
+                vector = bilstm_output.index_select(1,torch.tensor(i))\
+                    .squeeze(1)\
+                        .index_select(0,torch.tensor(l[i]-1))\
+                            .mean(dim=0)\
+                                .unsqueeze(0)
             else:
-                vector = torch.cat((vector, bilstm_output.index_select(
-                        1,
-                        torch.tensor(i)
-                    ).squeeze(
-                        1
-                    ).index_select(
-                        0,
-                        torch.tensor(l[i] - 1)
-                    ).mean(
-                        dim=0
-                    ).unsqueeze(0)), 
-                    0
-                )
+                vector = torch.cat((vector,bilstm_output.index_select(1,torch.tensor(i)).squeeze(1).index_select(0,torch.tensor(l[i]-1)).mean(dim=0).unsqueeze(0)),0)
 
         forwardfeednn = self.feedforwardnet(vector)
 
