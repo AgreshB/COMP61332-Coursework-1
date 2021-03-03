@@ -33,13 +33,33 @@ class BilstmRandom(nn.Module):
         # calculate mean of (re)padded vectors
         for i in range(0, bilstm_output_size):
             if i == 0:
-                vector = bilstm_output.index_select(1,torch.tensor(i))\
-                    .squeeze(1)\
-                        .index_select(0,torch.tensor(l[i]-1))\
-                            .mean(dim=0)\
-                                .unsqueeze(0)
+                vector = bilstm_output.index_select(
+                        1,
+                        torch.tensor(i)
+                    ).squeeze(
+                        1
+                    ).index_select(
+                        0,
+                        torch.tensor(l[i]-1)
+                    ).mean(
+                        dim=0
+                    ).unsqueeze(0)
             else:
-                vector = torch.cat((vector,bilstm_output.index_select(1,torch.tensor(i)).squeeze(1).index_select(0,torch.tensor(l[i]-1)).mean(dim=0).unsqueeze(0)),0)
+                vector = torch.cat(
+                    (
+                        vector,
+                        bilstm_output.index_select(
+                            1,
+                            torch.tensor(i)
+                        ).squeeze(
+                            1
+                        ).index_select(
+                            0,
+                            torch.tensor(l[i]-1)
+                        ).mean(
+                            dim=0
+                        ).unsqueeze(0)),
+                    0)
 
         forwardfeednn = self.feedforwardnet(vector)
 

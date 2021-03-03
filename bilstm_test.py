@@ -2,7 +2,7 @@ import torch
 from preprocessing import preprocess_pipeline, reload_preprocessed
 from eval import get_accuracy_test, get_accuracy_bilstm, get_confusion_matrix, get_macro_f1, get_micro_f1, get_confusion_matrix
 
-load_trained = True
+load_trained = False
 
 config = {
     "batch_size": 200,
@@ -17,7 +17,7 @@ config = {
 }
 
 if not load_trained:
-    preprocess_pipeline("res/train_5500.label")
+    preprocess_pipeline("res/TREC_10.label", is_train=False)
 
 labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation = reload_preprocessed() 
 

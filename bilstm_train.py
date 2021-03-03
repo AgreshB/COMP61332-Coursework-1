@@ -30,7 +30,7 @@ config = {
 }
 
 if not load_trained:
-    preprocess_pipeline("res/train_5500.label")
+    preprocess_pipeline("res/train_5500.label", is_train=True)
 
 labels, sentences, vocabulary, vocabulary_embed, sentence_representation, label_index, label_representation = reload_preprocessed() 
 

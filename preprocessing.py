@@ -89,21 +89,24 @@ def create_sentence_representation(sentences, vocab, vocab_embeddings):
         sentence_rep.append(torch.tensor(sr))
     return sentence_rep
 
-def create_labels_index_representation(labels):
+def create_labels_index(labels):
     label_indices = {}
-    label_representation = []
     count = 0
     for label in labels:
         if label not in label_indices:
             label_indices[label] = count
             count += 1
+    return label_indices
+
+def create_labels_representation(labels, label_indices):
+    label_representation = []
     for label in labels:
         label_representation.append(label_indices[label])
-    return label_indices, label_representation
+    return label_representation
 
 
 # performs necessary preprocessing and return relevant data
-def preprocess_pipeline(file_path: str):
+def preprocess_pipeline(file_path: str, is_train=True):
     labels = []
     sentences = []
     vocabulary = []
@@ -136,17 +139,23 @@ def preprocess_pipeline(file_path: str):
             # read next line
             line = fp.readline()
 
-    # generate vocabulary
-    vocabulary = create_vocab(sentences)
-
-    # generate the embeddings wrt vocabulary
-    vocabulary_embed = create_embeddings(vocabulary)
+    if is_train:
+        # generate vocabulary
+        vocabulary = create_vocab(sentences)
+        # generate the embeddings wrt vocabulary
+        vocabulary_embed = create_embeddings(vocabulary)
+        # generate label indices and label representation
+        label_index = create_labels_index(labels)
+    else:
+        vocabulary = torch.load("data/vocabulary.bin")
+        vocabulary_embed = torch.load("data/vocabulary_embed.bin")
+        label_index = torch.load("data/label_index.bin")
 
     # generate sentence representations using vocab
     sentence_representation = create_sentence_representation(sentences, vocabulary, vocabulary_embed)
 
-    # generate label indices and label representation
-    label_index, label_representation = create_labels_index_representation(labels)
+    # generate label representation
+    label_representation = create_labels_representation(labels, label_index)
     
     to_save = [
         (labels, 'labels'), 
