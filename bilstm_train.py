@@ -16,7 +16,7 @@ def qc_collate_fn_bilstm(input_dataset):
     data = torch.nn.utils.rnn.pad_sequence(data, padding_value=0)
     return data, label, length
 
-load_trained = True
+load_trained = False
 
 config = {
     "batch_size": 200,
