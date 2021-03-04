@@ -23,24 +23,24 @@ ALL_STOP_WORDS = ALL_STOP_WORDS.difference(TO_REMOVE_STOP_WORDS)
 
 # For spliting sentance into words , using general split
 # converts to lower case as well
-def split_tokenize(X):
+def split_tokenize(X: str):
     # converting to lower case and then splitting
     return X.lower().split()
 
 #function to remove stop words
-def remove_stop(word_list):
+def remove_stop(word_list: list):
     # for removing stop words from dictionary list
     list_without_stop = [word for word in word_list if not word in ALL_STOP_WORDS]
     return list_without_stop
 
 #function to remove punctuations
-def remove_punc(word_list):
+def remove_punc(word_list: list):
     # initializing punctuations string  
     list_without_punc = [re.sub(r'[{}]+'.format(punctuation), '', word) for word in word_list]
     return list_without_punc
 
 # Wraper function that uses all functionality above on a sentence 
-def process_sentence(sentence):
+def process_sentence(sentence: str):
     #first tokenize 
     tokens = split_tokenize(sentence)
     #strips puncuation and stop words
@@ -51,7 +51,7 @@ def process_sentence(sentence):
 # Function for creating Vocabulary
 # Takes array of questions
 # returns list of all words (no duplicates)
-def create_vocab(data):
+def create_vocab(data: list):
     #creating set in order to avoid duplicates
     vocab = set()
     for x in data:
@@ -59,9 +59,9 @@ def create_vocab(data):
         vocab.update(x.split())
     return list(vocab)
 
-def create_embeddings(vocab):
+def create_embeddings(vocab: list, pre_train_file_path: str):
     embeddings = {}
-    with open("data/glove.txt", 'r') as fp:
+    with open(pre_train_file_path, 'r') as fp:
         line = fp.readline()
         while line:
             split_line = line.split()
@@ -77,7 +77,7 @@ def create_embeddings(vocab):
     vocab_embeddings.append(embeddings['unk'])
     return vocab_embeddings
 
-def create_sentence_representation(sentences, vocab, vocab_embeddings):
+def create_sentence_representation(sentences: list, vocab: list, vocab_embeddings: list):
     sentence_rep = []
     for s in sentences:
         sr = []
@@ -89,7 +89,7 @@ def create_sentence_representation(sentences, vocab, vocab_embeddings):
         sentence_rep.append(torch.tensor(sr))
     return sentence_rep
 
-def create_labels_index(labels):
+def create_labels_index(labels: list):
     label_indices = {}
     count = 0
     for label in labels:
@@ -98,7 +98,7 @@ def create_labels_index(labels):
             count += 1
     return label_indices
 
-def create_labels_representation(labels, label_indices):
+def create_labels_representation(labels: list, label_indices: dict):
     label_representation = []
     for label in labels:
         label_representation.append(label_indices[label])
@@ -106,7 +106,7 @@ def create_labels_representation(labels, label_indices):
 
 
 # performs necessary preprocessing and return relevant data
-def preprocess_pipeline(file_path: str, is_train=True):
+def preprocess_pipeline(file_path: str, pre_train_file_path: str, is_train: bool):
     labels = []
     sentences = []
     vocabulary = []
@@ -143,7 +143,7 @@ def preprocess_pipeline(file_path: str, is_train=True):
         # generate vocabulary
         vocabulary = create_vocab(sentences)
         # generate the embeddings wrt vocabulary
-        vocabulary_embed = create_embeddings(vocabulary)
+        vocabulary_embed = create_embeddings(vocabulary, pre_train_file_path)
         # generate label indices and label representation
         label_index = create_labels_index(labels)
     else:
@@ -186,3 +186,9 @@ def reload_preprocessed():
         to_load[loaded] = torch.load(f"data/{loaded}.bin")
 
     return to_load['labels'], to_load['sentences'], to_load['vocabulary'], to_load['vocabulary_embed'], to_load['sentence_representation'], to_load['label_index'], to_load['label_representation']
+
+
+class PreProcesseData:
+    def __init__(self, file_path: str, pre_train_file_path:str, is_train: bool):
+        preprocess_pipeline(file_path, pre_train_file_path, is_train=is_train)
+        self.labels, self.sentences, self.vocabulary, self.vocabulary_embed, self.sentence_representation, self.label_index, self.label_representation = reload_preprocessed()
