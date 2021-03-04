@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from collections import defaultdict
 import time
+import numpy as np
 import matplotlib.pyplot as plt
 
 # creating list of stop words from Stop_words.txt
@@ -44,10 +45,21 @@ def process_sentence(sentence):
 # Takes array of questions
 # returns list of all words (no duplicates)
 def create_vocab(data):
-    #creating set in order to avoid duplicates
+    #creating set in order to avoid duplicatess
     vocab = set()
     for x in data:
         clean_x = process_sentence(x)
         vocab.update(clean_x)
     return list(vocab)
+
+
+# # This is the one hot vector approach not needed 
+# def bag_of_words(tokenized_sentance , vocab):
+#     # bag with size of vocab
+#     bag = np.zeros(len(vocab))
+#     # if word is present in the sentance , set index to 1
+#     for index, word in enumerate(vocab):
+#         if word in tokenized_sentance:
+#             bag[index] = 1
+#     return bag
 
