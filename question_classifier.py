@@ -1,10 +1,9 @@
 
 import sys, getopt
 import configparser
-from bilstm import BiLSTM
-#from bag_of_words import BagOfWords
-from bow_2 import BagOfWords
-from cbow import ContBagOfWords
+from bow.bow import BagOfWords
+from bow.cbow import ContBagOfWords
+from bilstm.bilstm import BiLSTM
 
 
 def main(argv):
