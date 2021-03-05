@@ -6,6 +6,15 @@ import numpy as np
 from collections import defaultdict
 import time
 from preprocessing import process_sentence
+import matplotlib.pyplot as plt
+
+
+class BoWClassifierModule(nn.Module):
+    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
+        super().__init__()
+        self.linear = nn.Linear(text_field_vocab, class_field_vocab)
+    def forward(self, docs):
+        return nn.functional.log_softmax(self.linear(docs), dim=0)
 
 def create_emb_layer(weights_matrix, non_trainable=False):
     num_embeddings, embedding_dim = weights_matrix.size()
@@ -15,14 +24,6 @@ def create_emb_layer(weights_matrix, non_trainable=False):
         emb_layer.weight.requires_grad = False
 
     return emb_layer, num_embeddings, embedding_dim
-
-class BoWClassifierModule(nn.Module):
-    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
-        super().__init__()
-        self.linear = nn.Linear(text_field_vocab, class_field_vocab)
-    def forward(self, docs):
-        lin = self.linear((docs))
-        return nn.functional.log_softmax(lin, dim=0)
 
 def loadGloveModel(File):
     print("Loading Glove Model")
@@ -35,30 +36,31 @@ def loadGloveModel(File):
         gloveModel[word] = wordEmbedding
     print(len(gloveModel)," words loaded!")
     return gloveModel
-class BoWTextClassifierModule(nn.Module):
-    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
-        super().__init__()
-        glove_model = loadGloveModel('data\glove.small')
 
-        weights_matrix = np.zeros((len(text_field_vocab), 300))
-        for idx, word in enumerate(text_field_vocab):
-            try: 
-                weights_matrix[idx] = glove_model[text_field_vocab[word]]
-            except KeyError:
-                weights_matrix[idx] = np.random.normal(scale=0.6, size=(300, ))
-        weights_matrix = torch.from_numpy(weights_matrix).to('cuda' if torch.cuda.is_available() else 'cpu')
-        
+class BoWTextClassifierModule(nn.Module):
+    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5, pretrained=False):
+        super().__init__()
         self.embedding = nn.Embedding(len(text_field_vocab), 300)
-        self.embedding.load_state_dict({'weight': weights_matrix})
-        self.top_layer = nn.Linear(300, len(class_field_vocab))
+        if(pretrained):
+            glove_model = loadGloveModel('data\glove.small')
+
+            weights_matrix = np.zeros((len(text_field_vocab), 300))
+            for idx, word in enumerate(text_field_vocab):
+                try:
+                    weights_matrix[idx] = glove_model[text_field_vocab[word]]
+                except KeyError:
+                    weights_matrix[idx] = np.random.normal(scale=0.6, size=(300, ))
+            weights_matrix = torch.from_numpy(weights_matrix).to('cuda' if torch.cuda.is_available() else 'cpu')
+            self.embedding.load_state_dict({'weight': weights_matrix})
+        
         self.dropout = nn.Dropout(dropout)
+        self.lin = nn.Linear(300, len(class_field_vocab))
     
     def forward(self, docs):
         embedded = self.embedding(docs)
-        bow = embedded.mean(dim=0)
-        bow_drop = self.dropout(bow)
-        scores = self.top_layer(bow_drop)
-        return scores
+        bow = embedded.mean(dim=1)
+        #bow_drop = self.dropout(bow)
+        return nn.functional.log_softmax(self.lin(bow), dim=0)
 
 # Read file data
 def read_data(filename):
@@ -123,6 +125,16 @@ class BagOfWords(Classifier):
         except ValueError:
             print("batch_size not a an integer. Defaulting to 128...")
             self.batch_size = 128
+        try:
+            self.stop_loss = int(config.get('BOW', 'stop_loss'))
+        except ValueError:
+            print("stop_loss not a an integer. Defaulting to 5...")
+            self.stop_loss = 5
+        try:
+            self.min_word_freq = int(config.get('BOW', 'min_word_freq'))
+        except ValueError:
+            print("min_word_freq not a an integer. Defaulting to 5...")
+            self.min_word_freq = 5
 
     def evaluate_validation(scores, loss_function, correct):
         guesses = scores.argmax(dim=1)
@@ -142,20 +154,15 @@ class BagOfWords(Classifier):
             for idx in j:
                 data_array[idx][i] += 1
 
-        test = data_array.sum(axis=1)
-        zipped_lists = list(zip(test, data_array))
+        # Remove words with a low frequency
+        data_freq = data_array.sum(axis=1)
+        zipped_lists = list(zip(data_freq, data_array))
         zipped_lists = sorted(zipped_lists, key = lambda x: x[0], reverse=True)
-        zipped_lists = [(x, y) for x, y in zipped_lists if x >= 5]
-        test, data_array = zip(*zipped_lists)
-        #sorted(zipped_lists, key=lambda x: x[1])
+        zipped_lists = [(x, y) for x, y in zipped_lists if x >= self.min_word_freq]
+        data_freq, data_array = zip(*zipped_lists)
         data_array = np.array(data_array).transpose()
 
-        data_vocab_2 = {}
-        for idx, tot in enumerate(test):
-            if tot > 100:
-                data_vocab_2[tot] = (data_vocab[idx])
-
-
+        # Data to pytorch 
         data_array = torch.from_numpy(np.array(data_array, dtype=np.double)).to(device)
         label_array = torch.from_numpy(np.array(label, dtype=np.int64)).to(device)
         
@@ -165,21 +172,19 @@ class BagOfWords(Classifier):
         train_label, val_label = label_array[split:], label_array[:split]
         train_data, val_data = data_array[split:], data_array[:split]
         
-        n_valid = len(val_data)
-
         # Declare the model
-        #model = BoWTextClassifierModule((data_vocab_2), (label_vocab), emb_dim=self.emb)   
-        model = BoWClassifierModule(len(test), len(label_vocab), emb_dim=self.emb)  
+        #model = BoWTextClassifierModule((test), (label_vocab), emb_dim=self.emb)   
+        model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.emb)  
         
-        # Put the model on cpu
+        # Put the model on gpu/cpu
         model.to(device)
+
+        # Cast floating points to double types
         model.double()
         
         # Cross-entropy loss and adam optimizer
         loss_function = nn.CrossEntropyLoss()
-        #loss_function = nn.NLLLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
-        #optimizer = torch.optim.SGD(model.parameters(), lr = self.lr)
 
         # History to record
         history = defaultdict(list)
@@ -192,6 +197,9 @@ class BagOfWords(Classifier):
             ),
             batch_size=self.batch_size, shuffle=True)
         n_batches = len(train_loader)
+        loss_count = 0
+        prev_val_acc = 0.
+        n_valid = len(val_data)
         # Iterate through epochs
         for i in range(self.epoch):
             # Reset variables
@@ -206,6 +214,7 @@ class BagOfWords(Classifier):
 
                 # Compute the scores and loss function
                 scores = model((train_data_batch))
+                #scores = model(torch.transpose(train_data_batch))
                 loss = loss_function(scores, train_label_batch)
 
                 # Compute the gradient with respect to the loss, and update the parameters of the model.
@@ -225,6 +234,7 @@ class BagOfWords(Classifier):
             
             # Compute the loss and accuracy on the validation set.
             scores = model(val_data)
+            #scores = model(torch.transpose(val_data))
             correct, val_loss = evaluate_validation(scores, loss_function, val_label)
             val_acc = correct / n_valid
             history['val_loss'].append(val_loss)
@@ -235,7 +245,20 @@ class BagOfWords(Classifier):
 
             # Print epoch data
             print(f'Epoch {i+1}: train loss = {train_loss:.4f}, val loss = {val_loss:.4f}, val acc: {val_acc:.4f}, time = {t1-t0:.4f}')
+            if(val_acc < prev_val_acc):
+                loss_count += 1
+                if(loss_count >= self.stop_loss):
+                    break
+            else:
+                loss_count = 0
+                prev_val_acc = val_acc
         print("BoW: Training complete!")
+        # Plot model
+        plt.plot(history['train_loss'])
+        plt.plot(history['val_loss'])
+        plt.plot(history['val_acc'])
+        plt.legend(['training loss', 'validation loss', 'validation accuracy'])
+        plt.show()
 
     #TODO: Create Test function
     def test(self):
