@@ -1,8 +1,9 @@
 
 import sys, getopt
 import configparser
-from bilstm import BiLSTM
-from bag_of_words import BagOfWords
+from bow.bow import BagOfWords
+from bow.cbow import ContBagOfWords
+from bilstm.bilstm import BiLSTM
 
 
 def main(argv):
@@ -33,10 +34,12 @@ def main(argv):
     
     if modelString == 'bow':
         model = BagOfWords(config)
+    elif modelString == 'cbow':
+        model = ContBagOfWords(config)
     elif modelString == 'bilstm':
         model = BiLSTM(config)
     else:
-        print('Error choosing model! Model is currently: ',model)
+        print('Error choosing model! Model is currently: ',modelString)
 
     if(train):
         model.train()
