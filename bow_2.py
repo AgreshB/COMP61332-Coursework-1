@@ -38,7 +38,7 @@ def loadGloveModel(File):
 class BoWTextClassifierModule(nn.Module):
     def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
         super().__init__()
-        glove_model = loadGloveModel('data\glove.txt')
+        glove_model = loadGloveModel('data\glove.small')
 
         weights_matrix = np.zeros((len(text_field_vocab), 300))
         for idx, word in enumerate(text_field_vocab):
