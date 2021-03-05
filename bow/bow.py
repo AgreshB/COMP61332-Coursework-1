@@ -105,36 +105,6 @@ class BagOfWords(Classifier):
         Classifier.__init__(self,config)
         self.config = config
 
-        try:
-            self.lr = float(config.get('BOW', 'lr_param'))
-        except ValueError:
-            print("lr_param not a float. Defaulting to 0.02...")
-            self.lr = 0.02
-        try:
-            self.epoch = int(config.get('BOW', 'epoch'))
-        except ValueError:
-            print("epoch not an integer. Defaulting to 100...")
-            self.epoch = 100
-        try:
-            self.emb = int(config.get('BOW', 'emb'))
-        except ValueError:
-            print("emb not a an integer. Defaulting to 16...")
-            self.emb = 16
-        try:
-            self.batch_size = int(config.get('BOW', 'batch_size'))
-        except ValueError:
-            print("batch_size not a an integer. Defaulting to 128...")
-            self.batch_size = 128
-        try:
-            self.stop_loss = int(config.get('BOW', 'stop_loss'))
-        except ValueError:
-            print("stop_loss not a an integer. Defaulting to 5...")
-            self.stop_loss = 5
-        try:
-            self.min_word_freq = int(config.get('BOW', 'min_word_freq'))
-        except ValueError:
-            print("min_word_freq not a an integer. Defaulting to 5...")
-            self.min_word_freq = 5
 
     def evaluate_validation(scores, loss_function, correct):
         guesses = scores.argmax(dim=1)
@@ -145,7 +115,7 @@ class BagOfWords(Classifier):
         print("BoW: Training began...")
         device = ('cuda' if torch.cuda.is_available() else 'cpu')
         print('Running device on:',device)
-        label, data, label_vocab, data_vocab = read_data(self.train_filename)
+        label, data, label_vocab, data_vocab = read_data(self.config['train_filename'])
 
 
         # Create tensors
@@ -158,7 +128,7 @@ class BagOfWords(Classifier):
         data_freq = data_array.sum(axis=1)
         zipped_lists = list(zip(data_freq, data_array))
         zipped_lists = sorted(zipped_lists, key = lambda x: x[0], reverse=True)
-        zipped_lists = [(x, y) for x, y in zipped_lists if x >= self.min_word_freq]
+        zipped_lists = [(x, y) for x, y in zipped_lists if x >= self.config['min_word_freq']]
         data_freq, data_array = zip(*zipped_lists)
         data_array = np.array(data_array).transpose()
 
@@ -174,7 +144,7 @@ class BagOfWords(Classifier):
         
         # Declare the model
         #model = BoWTextClassifierModule((test), (label_vocab), emb_dim=self.emb)   
-        model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.emb)  
+        model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'])  
         
         # Put the model on gpu/cpu
         model.to(device)
@@ -184,7 +154,7 @@ class BagOfWords(Classifier):
         
         # Cross-entropy loss and adam optimizer
         loss_function = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.config['lr_param'])
 
         # History to record
         history = defaultdict(list)
@@ -195,13 +165,13 @@ class BagOfWords(Classifier):
                 train_label,
                 train_data
             ),
-            batch_size=self.batch_size, shuffle=True)
+            batch_size=self.config['batch_size'], shuffle=True)
         n_batches = len(train_loader)
         loss_count = 0
         prev_val_acc = 0.
         n_valid = len(val_data)
         # Iterate through epochs
-        for i in range(self.epoch):
+        for i in range(self.config['epoch']):
             # Reset variables
             t0 = time.time()
             loss_sum = 0
@@ -247,12 +217,17 @@ class BagOfWords(Classifier):
             print(f'Epoch {i+1}: train loss = {train_loss:.4f}, val loss = {val_loss:.4f}, val acc: {val_acc:.4f}, time = {t1-t0:.4f}')
             if(val_acc < prev_val_acc):
                 loss_count += 1
-                if(loss_count >= self.stop_loss):
+                if(loss_count >= self.config['stop_loss']):
                     break
             else:
                 loss_count = 0
                 prev_val_acc = val_acc
         print("BoW: Training complete!")
+        print("Saving file...")
+        torch.save(model.state_dict(), "test.bin")
+        print("Saved!")
+
+        print("Displaying results:")
         # Plot model
         plt.plot(history['train_loss'])
         plt.plot(history['val_loss'])

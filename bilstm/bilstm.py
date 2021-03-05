@@ -82,9 +82,3 @@ class BiLSTM(Classifier):
         accuracy, y_pred = tester.doTesting()
         print("BiLSTM: Test results:")
         print("Accuracy: ", accuracy)
-
-
-bilstm_classifer = BiLSTM(config)
-
-# run train
-bilstm_classifer.train()
