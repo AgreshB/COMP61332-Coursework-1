@@ -73,8 +73,8 @@ def create_embeddings(vocab: list, pre_train_file_path: str):
         if embed.size > 0:
             vocab_embeddings.append(embed)
         else:
-            vocab_embeddings.append(embeddings['unk'])
-    vocab_embeddings.append(embeddings['unk'])
+            vocab_embeddings.append(embeddings['#UNK#'])
+    vocab_embeddings.append(embeddings['#UNK#'])
     return vocab_embeddings
 
 def create_sentence_representation(sentences: list, vocab: list, vocab_embeddings: list):

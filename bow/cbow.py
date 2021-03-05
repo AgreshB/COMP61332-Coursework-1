@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from collections import defaultdict
 import time
-from preprocessing import process_sentence
+from bow.preprocessing import process_sentence
 
 
 class BoWTextClassifierModule(nn.Module):

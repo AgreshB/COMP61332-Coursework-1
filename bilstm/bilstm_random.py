@@ -1,5 +1,5 @@
 import torch.nn as nn
-from bilstm_model import BilstmModel
+from bilstm.bilstm_model import BilstmModel
 
 class BilstmRandom(BilstmModel):
     def __init__(self, input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad=True):

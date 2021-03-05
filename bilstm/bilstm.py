@@ -1,11 +1,11 @@
 import torch
 from classifier import Classifier
-from train import Train
-from test import Test
-from preprocessing import PreProcesseData
-from bilstm_random import BilstmRandom
-from bilstm_pretrain import BilstmPretrain
-from eval import get_accuracy_bilstm
+from bilstm.train import Train
+from bilstm.test import Test
+from bilstm.preprocessing import PreProcesseData
+from bilstm.bilstm_random import BilstmRandom
+from bilstm.bilstm_pretrain import BilstmPretrain
+from bilstm.eval import get_accuracy_bilstm
 
 config = {
     "batch_size": 200,
@@ -21,7 +21,7 @@ config = {
     "freeze": False,
     "train_data_file_path": "res/train_5500.label",
     "test_data_file_path": "res/TREC_10.label",
-    "pre_train_file_path": "data/glove.txt",
+    "pre_train_file_path": "data/glove.small",
 }
 
 class BiLSTM(Classifier):

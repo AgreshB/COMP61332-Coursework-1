@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from feedforward import Feedforward
+from bilstm.feedforward import Feedforward
 
 class BilstmModel(nn.Module):
     def __init__(self, input_size, hidden_zie, forward_hidden_zie, forward_output_size, enable_grad=True):

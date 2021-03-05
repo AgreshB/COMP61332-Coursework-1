@@ -1,5 +1,5 @@
 import torch
-from preprocessing import PreProcesseData
+from bilstm.preprocessing import PreProcesseData
 import numpy as np
 
 def get_accuracy_test(model, model_type, x, y, lengths):
