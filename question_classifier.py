@@ -3,7 +3,7 @@ import sys, getopt
 import configparser
 from bilstm import BiLSTM
 #from bag_of_words import BagOfWords
-from bow import BagOfWords
+from bow_2 import BagOfWords
 from cbow import ContBagOfWords
 
 
