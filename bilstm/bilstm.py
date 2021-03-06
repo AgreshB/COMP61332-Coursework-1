@@ -3,7 +3,7 @@ from classifier import Classifier
 from bilstm.train import Train
 from bilstm.test import Test
 from bilstm.preprocessing import PreProcesseData
-from bilstm.bilstm_random import BilstmRandom
+from bilstm.bilstm_random import BilstmRandom, BilstmEnsemble
 from bilstm.bilstm_pretrain import BilstmPretrain
 from bilstm.eval import get_accuracy_bilstm
 
@@ -17,6 +17,8 @@ config = {
     "epoch": 30,
     "early_stop": 500,
     "use_pretrained": False,
+    "use_ensemble" : False,
+    "n_models": 3,
     "path_model": "data/bilstm.model",
     "freeze": False,
     "train_data_file_path": "res/train_5500.label",
@@ -43,7 +45,7 @@ class BiLSTM(Classifier):
         # preprocess data
         preProcessedData = PreProcesseData(file_path=config["train_data_file_path"], pre_train_file_path=config["pre_train_file_path"], is_train=True)
 
-        # initialise train 
+        # initialise train
         trainer = Train(config=config, preProcessedData=preProcessedData, collate_fn=self.collate_fxn)
 
         # choose model to be trained
@@ -53,18 +55,28 @@ class BiLSTM(Classifier):
                 hidden_zie=config['bilstm_hidden_size'],
                 forward_hidden_zie=config['hidden_size'],
                 forward_output_size=len(preProcessedData.label_index),
-                enable_grad=config['freeze']
+                enable_grad=not config['freeze']
             )
         else:
-            model = BilstmRandom(
-                input_size=config['embed_dim'],
-                hidden_zie=config['bilstm_hidden_size'],
-                vocabulary_size=len(preProcessedData.vocabulary) + 1,
-                forward_hidden_zie=config['hidden_size'],
-                forward_output_size=len(preProcessedData.label_index),
-                enable_grad=config['freeze']
-            )
-        
+            if self.config['use_ensemble']:
+                model = BilstmEnsemble(
+                    n_models=config['n_models'],
+                    input_size=config['embed_dim'],
+                    hidden_zie=config['bilstm_hidden_size'],
+                    vocabulary_size=len(preProcessedData.vocabulary) + 1,
+                    forward_hidden_zie=config['hidden_size'],
+                    forward_output_size=len(preProcessedData.label_index),
+                    enable_grad=config['freeze'],
+                )
+            else:
+                model = BilstmRandom(
+                    input_size=config['embed_dim'],
+                    hidden_zie=config['bilstm_hidden_size'],
+                    vocabulary_size=len(preProcessedData.vocabulary) + 1,
+                    forward_hidden_zie=config['hidden_size'],
+                    forward_output_size=len(preProcessedData.label_index),
+                    enable_grad=config['freeze'],
+                )
         # choose loss function and optimser
         loss_fxn = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(model.parameters(), lr=config["lr"], momentum=config["momentum"])
