@@ -69,7 +69,7 @@ def main(argv):
         model = BiLSTM(config)
     else:
         print('Error choosing model! Model is currently: ',modelString)
-
+    
     if(train):
         model.train()
     if(test):

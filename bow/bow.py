@@ -126,10 +126,10 @@ class BagOfWords(Classifier):
 
         # Remove words with a low frequency
         data_freq = data_array.sum(axis=1)
-        zipped_lists = list(zip(data_freq, data_array))
+        zipped_lists = list(zip(data_freq, data_array, data_vocab))
         zipped_lists = sorted(zipped_lists, key = lambda x: x[0], reverse=True)
-        zipped_lists = [(x, y) for x, y in zipped_lists if x >= self.config['min_word_freq']]
-        data_freq, data_array = zip(*zipped_lists)
+        zipped_lists = [(x, y, z) for x, y, z in zipped_lists if x >= self.config['min_word_freq']]
+        data_freq, data_array, data_vocab = zip(*zipped_lists)
         data_array = np.array(data_array).transpose()
 
         # Data to pytorch 
@@ -223,9 +223,22 @@ class BagOfWords(Classifier):
                 loss_count = 0
                 prev_val_acc = val_acc
         print("BoW: Training complete!")
-        print("Saving file...")
-        torch.save(model.state_dict(), "test.bin")
-        print("Saved!")
+        if not self.config['path_model']:
+            print("Not saving!")
+        else:
+            print("Saving files...")
+            # Save model
+            torch.save(model, f"{self.config['path_model']}.model")
+            # Save data vocab
+            with open(f"{self.config['path_model']}.dvoc", 'w') as fp:
+                for t in data_vocab:
+                    fp.write(''.join(str(s) for s in t) + '\n')
+            # Save label vocab
+            with open(f"{self.config['path_model']}.lvoc", 'w') as fp:
+                for t in label_vocab:
+                    fp.write(''.join(str(s) for s in t) + '\n')
+            
+            print(f"Saved as {self.config['path_model']} ().lvoc/.dvoc/.model)!")
 
         print("Displaying results:")
         # Plot model
@@ -235,6 +248,57 @@ class BagOfWords(Classifier):
         plt.legend(['training loss', 'validation loss', 'validation accuracy'])
         plt.show()
 
-    #TODO: Create Test function
     def test(self):
+        if not self.config['path_model']:
+            print("Filename empty!")
+            return
+        
         print("BoW: Test results:")
+        device = ('cuda' if torch.cuda.is_available() else 'cpu')
+        print('Running device on:',device)
+        label, data, label_vocab, data_vocab = read_data(self.config['test_filename'])
+
+        # Get previous vocabs
+        data_vocab_read = []
+        with open(f"{self.config['path_model']}.dvoc", 'r') as fp:
+            data_vocab_read = fp.read().splitlines()
+        label_vocab_read = []
+        with open(f"{self.config['path_model']}.lvoc", 'r') as fp:
+            label_vocab_read = fp.read().splitlines()
+
+        # Translate to previous vocabs
+        data_array = np.zeros([len(data_vocab_read),len(data)], dtype = np.double)
+        for i,j in enumerate(data):
+            for idx in j:
+                if (data_vocab[idx] in data_vocab_read):
+                    data_array[data_vocab_read.index(data_vocab[idx])][i] += 1
+
+        label_array = np.zeros([len(label)], dtype = np.double)
+        for i,j in enumerate(label):
+            if (label_vocab[j] in label_vocab_read):
+                label_array[i] = label_vocab_read.index(label_vocab[j])
+
+        # Data to pytorch 
+        data_array = torch.from_numpy(np.array(data_array.transpose(), dtype=np.double)).to(device)
+        label_array = torch.from_numpy(np.array(label_array, dtype=np.int64)).to(device)
+        
+        # Declare the model
+        model = torch.load(f"{self.config['path_model']}.model")
+
+        # Put the model on gpu/cpu
+        model.to(device)
+
+        # Cast floating points to double types
+        model.double()
+        
+        # Cross-entropy loss and adam optimizer
+        loss_function = nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.config['lr_param'])
+
+        # Disable the dropout layers.
+        model.eval()
+        
+        # Compute the loss and accuracy on the validation set.
+        scores = model(data_array)
+        val_acc = (scores.argmax(dim=1) == label_array).sum().item() / len(data_array)
+        print(f'val acc: {val_acc:.4f}')

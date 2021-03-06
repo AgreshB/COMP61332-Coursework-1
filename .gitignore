@@ -49,3 +49,5 @@ bilstm.config
 
 *.bin
 *.model
+*.dvoc
+*.lvoc
