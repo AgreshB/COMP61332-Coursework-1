@@ -7,7 +7,32 @@ from collections import defaultdict
 import time
 from bow.preprocessing import process_sentence
 import matplotlib.pyplot as plt
+import itertools
 
+def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=90)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center", color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()
 
 class BoWClassifierModule(nn.Module):
     def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5):
@@ -133,7 +158,8 @@ class BagOfWords(Classifier):
         data_array = np.array(data_array).transpose()
 
         # Data to pytorch 
-        data_array = torch.from_numpy(np.array(data_array, dtype=np.int64)).to(device)
+        #data_array = torch.from_numpy(np.array(data_array, dtype=np.int64)).to(device)
+        data_array = torch.from_numpy(np.array(data_array, dtype=np.double)).to(device)
         label_array = torch.from_numpy(np.array(label, dtype=np.int64)).to(device)
         
         # Split training and validation 90/10
@@ -144,8 +170,8 @@ class BagOfWords(Classifier):
         
         # Declare the model
         # need to use BOWTextClassifier for pretrained 
-        model = BoWTextClassifierModule(data_freq, label_vocab, emb_dim=self.config['emb'],pretrained=self.config['use_pretrained'],freeze=self.config['freeze'])    
-        #model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'],)  
+        #model = BoWTextClassifierModule(data_freq, label_vocab, emb_dim=self.config['emb'],pretrained=self.config['use_pretrained'],freeze=self.config['freeze'])    
+        model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'],)  
         
         # Put the model on gpu/cpu
         model.to(device)
@@ -303,3 +329,10 @@ class BagOfWords(Classifier):
         scores = model(data_array)
         val_acc = (scores.argmax(dim=1) == label_array).sum().item() / len(data_array)
         print(f'val acc: {val_acc:.4f}')
+        
+        stacked = torch.stack((label_array, scores.argmax(dim=1)),dim=1)
+        cmt = torch.zeros(len(label_vocab_read),len(label_vocab_read), dtype=torch.int64)
+        for p in stacked:
+            tl, pl = p.tolist()
+            cmt[tl, pl] = cmt[tl, pl] + 1
+        plot_confusion_matrix(cmt,label_vocab_read)
