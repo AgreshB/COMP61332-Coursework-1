@@ -38,20 +38,20 @@ def loadGloveModel(File):
     return gloveModel
 
 class BoWTextClassifierModule(nn.Module):
-    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5, pretrained=False):
+    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5, pretrained=False , freeze =True):
         super().__init__()
         self.embedding = nn.Embedding(len(text_field_vocab), 300)
         if(pretrained):
-            glove_model = loadGloveModel('data\glove.small')
+            glove_model = loadGloveModel('data/glove.small')
 
             weights_matrix = np.zeros((len(text_field_vocab), 300))
             for idx, word in enumerate(text_field_vocab):
                 try:
-                    weights_matrix[idx] = glove_model[text_field_vocab[word]]
+                    weights_matrix[idx] = glove_model[word]
                 except KeyError:
                     weights_matrix[idx] = np.random.normal(scale=0.6, size=(300, ))
             weights_matrix = torch.from_numpy(weights_matrix).to('cuda' if torch.cuda.is_available() else 'cpu')
-            self.embedding.load_state_dict({'weight': weights_matrix})
+            self.embedding.from_pretrained(weights_matrix,freeze = freeze)
         
         self.dropout = nn.Dropout(dropout)
         self.lin = nn.Linear(300, len(class_field_vocab))
@@ -133,7 +133,7 @@ class BagOfWords(Classifier):
         data_array = np.array(data_array).transpose()
 
         # Data to pytorch 
-        data_array = torch.from_numpy(np.array(data_array, dtype=np.double)).to(device)
+        data_array = torch.from_numpy(np.array(data_array, dtype=np.int64)).to(device)
         label_array = torch.from_numpy(np.array(label, dtype=np.int64)).to(device)
         
         # Split training and validation 90/10
@@ -143,8 +143,9 @@ class BagOfWords(Classifier):
         train_data, val_data = data_array[split:], data_array[:split]
         
         # Declare the model
-        #model = BoWTextClassifierModule((test), (label_vocab), emb_dim=self.emb)   
-        model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'])  
+        # need to use BOWTextClassifier for pretrained 
+        model = BoWTextClassifierModule(data_freq, label_vocab, emb_dim=self.config['emb'],pretrained=self.config['use_pretrained'],freeze=self.config['freeze'])    
+        #model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'],)  
         
         # Put the model on gpu/cpu
         model.to(device)
