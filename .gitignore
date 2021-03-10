@@ -43,7 +43,7 @@ debugpy*.log
 pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
-
+test.py
 data/glove.txt
 bilstm.config
 
