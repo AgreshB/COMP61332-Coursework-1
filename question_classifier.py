@@ -37,8 +37,11 @@ def main(argv):
                 di.setdefault(a, int(b))
             if(RepresentsFloat(b)):
                 di.setdefault(a, float(b))
-            elif(RepresentsBool(b)):
-                di.setdefault(a, bool(b))
+            if(RepresentsBool(b)):
+                if b =="True":
+                    di.setdefault(a, bool(b))
+                else:
+                    di.setdefault(a, bool(""))
             else:
                 di.setdefault(a, b)
         return di

@@ -49,12 +49,11 @@ def loadGloveModel(File):
     return gloveModel
 
 class BoWTextClassifierModule(nn.Module):
-    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5, pretrained=False , freeze =True):
+    def __init__(self, text_field_vocab, class_field_vocab, emb_dim, dropout=0.5, pretrained=False , fr =True):
         super().__init__()
         self.embedding = nn.Embedding(len(text_field_vocab), 300)
         if(pretrained):
             glove_model = loadGloveModel('data/glove.small')
-
             weights_matrix = np.zeros((len(text_field_vocab), 300))
             for idx, word in enumerate(text_field_vocab):
                 try:
@@ -62,7 +61,7 @@ class BoWTextClassifierModule(nn.Module):
                 except KeyError:
                     weights_matrix[idx] = np.random.normal(scale=0.6, size=(300, ))
             weights_matrix = torch.from_numpy(weights_matrix).to('cuda' if torch.cuda.is_available() else 'cpu')
-            self.embedding.from_pretrained(weights_matrix,freeze = freeze)
+            self.embedding.from_pretrained(weights_matrix,freeze = fr)
         
         self.l1 = nn.Linear(300, len(class_field_vocab))
     
@@ -158,7 +157,7 @@ class BagOfWords(Classifier):
 
         # Declare the model
         # need to use BOWTextClassifier for pretrained 
-        model = BoWTextClassifierModule(data_vocab, label_vocab, emb_dim=self.config['emb'],pretrained=self.config['use_pretrained'],freeze=self.config['freeze'])    
+        model = BoWTextClassifierModule(data_vocab, label_vocab, emb_dim=self.config['emb'],pretrained=self.config['use_pretrained'],fr=self.config['freeze'])    
         #model = BoWClassifierModule(len(data_freq), len(label_vocab), emb_dim=self.config['emb'],)  
         
         # Put the model on gpu/cpu
