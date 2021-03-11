@@ -59,7 +59,7 @@ def create_vocab(data: list):
         vocab.update(x.split())
     return list(vocab)
 
-def create_embeddings(vocab: list, pre_train_file_path: str):
+def create_embeddings(vocab: list, pre_train_file_path: str, unk_token: str):
     embeddings = {}
     with open(pre_train_file_path, 'r') as fp:
         line = fp.readline()
@@ -73,8 +73,8 @@ def create_embeddings(vocab: list, pre_train_file_path: str):
         if embed.size > 0:
             vocab_embeddings.append(embed)
         else:
-            vocab_embeddings.append(embeddings['#UNK#'])
-    vocab_embeddings.append(embeddings['#UNK#'])
+            vocab_embeddings.append(embeddings[unk_token])
+    vocab_embeddings.append(embeddings[unk_token])
     return vocab_embeddings
 
 def create_sentence_representation(sentences: list, vocab: list, vocab_embeddings: list):
@@ -106,7 +106,7 @@ def create_labels_representation(labels: list, label_indices: dict):
 
 
 # performs necessary preprocessing and return relevant data
-def preprocess_pipeline(file_path: str, pre_train_file_path: str, is_train: bool):
+def preprocess_pipeline(file_path: str, pre_train_file_path: str, unk_token: str, is_train: bool):
     labels = []
     sentences = []
     vocabulary = []
@@ -143,7 +143,7 @@ def preprocess_pipeline(file_path: str, pre_train_file_path: str, is_train: bool
         # generate vocabulary
         vocabulary = create_vocab(sentences)
         # generate the embeddings wrt vocabulary
-        vocabulary_embed = create_embeddings(vocabulary, pre_train_file_path)
+        vocabulary_embed = create_embeddings(vocabulary, pre_train_file_path, unk_token)
         # generate label indices and label representation
         label_index = create_labels_index(labels)
     else:
@@ -189,6 +189,6 @@ def reload_preprocessed():
 
 
 class PreProcesseData:
-    def __init__(self, file_path: str, pre_train_file_path:str, is_train: bool):
-        preprocess_pipeline(file_path, pre_train_file_path, is_train=is_train)
+    def __init__(self, file_path: str, pre_train_file_path: str, unk_token: str, is_train: bool):
+        preprocess_pipeline(file_path, pre_train_file_path, unk_token, is_train=is_train)
         self.labels, self.sentences, self.vocabulary, self.vocabulary_embed, self.sentence_representation, self.label_index, self.label_representation = reload_preprocessed()
