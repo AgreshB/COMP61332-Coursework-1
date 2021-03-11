@@ -68,8 +68,6 @@ def main(argv):
         model = BagOfWords(config)
     elif modelString == 'cbow':
         model = ContBagOfWords(config)
-    elif modelString == 'bilstm' and config["use_ensemble"]:
-        model = BistmEnsemble(config)
     elif modelString == 'bilstm':
         model = BiLSTM(config)
     else:

@@ -1,0 +1,81 @@
+epoch: 1	batch: 2	accuracy: 0.184981684981685
+epoch: 1	batch: 6	accuracy: 0.18681318681318682
+epoch: 1	batch: 7	accuracy: 0.19047619047619047
+epoch: 1	batch: 9	accuracy: 0.20512820512820512
+epoch: 1	batch: 10	accuracy: 0.21428571428571427
+epoch: 1	batch: 11	accuracy: 0.21611721611721613
+epoch: 1	batch: 13	accuracy: 0.2326007326007326
+epoch: 1	batch: 16	accuracy: 0.2564102564102564
+epoch: 1	batch: 21	accuracy: 0.27106227106227104
+epoch: 1	batch: 26	accuracy: 0.2838827838827839
+epoch: 2	batch: 9	accuracy: 0.30036630036630035
+epoch: 2	batch: 11	accuracy: 0.30952380952380953
+epoch: 2	batch: 13	accuracy: 0.31135531135531136
+epoch: 2	batch: 16	accuracy: 0.3241758241758242
+epoch: 2	batch: 19	accuracy: 0.33516483516483514
+epoch: 2	batch: 20	accuracy: 0.3443223443223443
+epoch: 2	batch: 21	accuracy: 0.3516483516483517
+epoch: 2	batch: 23	accuracy: 0.3534798534798535
+epoch: 2	batch: 24	accuracy: 0.358974358974359
+epoch: 3	batch: 2	accuracy: 0.3608058608058608
+epoch: 3	batch: 3	accuracy: 0.36446886446886445
+epoch: 3	batch: 5	accuracy: 0.3663003663003663
+epoch: 3	batch: 6	accuracy: 0.3791208791208791
+epoch: 3	batch: 11	accuracy: 0.38461538461538464
+epoch: 3	batch: 12	accuracy: 0.39194139194139194
+epoch: 3	batch: 13	accuracy: 0.39377289377289376
+epoch: 3	batch: 14	accuracy: 0.3974358974358974
+epoch: 3	batch: 16	accuracy: 0.4010989010989011
+epoch: 3	batch: 20	accuracy: 0.4084249084249084
+epoch: 3	batch: 22	accuracy: 0.41025641025641024
+epoch: 3	batch: 23	accuracy: 0.42124542124542125
+epoch: 4	batch: 6	accuracy: 0.4358974358974359
+epoch: 4	batch: 9	accuracy: 0.43956043956043955
+epoch: 4	batch: 13	accuracy: 0.4413919413919414
+epoch: 4	batch: 16	accuracy: 0.44505494505494503
+epoch: 4	batch: 19	accuracy: 0.44871794871794873
+epoch: 4	batch: 22	accuracy: 0.46153846153846156
+epoch: 5	batch: 6	accuracy: 0.4633699633699634
+epoch: 5	batch: 7	accuracy: 0.46703296703296704
+epoch: 5	batch: 9	accuracy: 0.47985347985347987
+epoch: 5	batch: 11	accuracy: 0.4816849816849817
+epoch: 5	batch: 13	accuracy: 0.4835164835164835
+epoch: 5	batch: 19	accuracy: 0.489010989010989
+epoch: 5	batch: 22	accuracy: 0.4981684981684982
+epoch: 5	batch: 24	accuracy: 0.5018315018315018
+epoch: 6	batch: 3	accuracy: 0.5128205128205128
+epoch: 6	batch: 8	accuracy: 0.5146520146520146
+epoch: 6	batch: 9	accuracy: 0.5164835164835165
+epoch: 6	batch: 10	accuracy: 0.5201465201465202
+epoch: 6	batch: 17	accuracy: 0.521978021978022
+epoch: 7	batch: 3	accuracy: 0.5256410256410257
+epoch: 7	batch: 9	accuracy: 0.5293040293040293
+epoch: 7	batch: 11	accuracy: 0.532967032967033
+epoch: 8	batch: 8	accuracy: 0.5402930402930403
+epoch: 8	batch: 12	accuracy: 0.5439560439560439
+epoch: 9	batch: 10	accuracy: 0.5494505494505495
+epoch: 9	batch: 11	accuracy: 0.5512820512820513
+epoch: 9	batch: 12	accuracy: 0.5531135531135531
+epoch: 10	batch: 13	accuracy: 0.554945054945055
+epoch: 10	batch: 14	accuracy: 0.5567765567765568
+epoch: 10	batch: 16	accuracy: 0.5604395604395604
+epoch: 10	batch: 18	accuracy: 0.5641025641025641
+epoch: 15	batch: 3	accuracy: 0.5677655677655677
+epoch: 16	batch: 8	accuracy: 0.5695970695970696
+epoch: 20	batch: 4	accuracy: 0.5732600732600732
+epoch: 21	batch: 5	accuracy: 0.575091575091575
+epoch: 23	batch: 20	accuracy: 0.5769230769230769
+epoch: 25	batch: 19	accuracy: 0.5787545787545788
+epoch: 28	batch: 18	accuracy: 0.5805860805860806
+BiLSTM: Train results:
+Accuracy:  0.5805860805860806
+Confusion Matrix:
+ [[ 4  0  0 ...  0  0  0]
+ [ 1  5  0 ...  0  0  0]
+ [ 0  0  3 ...  0  0  0]
+ ...
+ [ 0  0  0 ...  0  0  0]
+ [ 0  0  0 ...  0  0  0]
+ [ 0  0  0 ...  0  0 30]]
+Micro F1:  0.5805860805860806
+Macro F1:  0.4299107475112845

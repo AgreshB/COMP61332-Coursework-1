@@ -6,6 +6,7 @@ class Train:
     def __init__(self, config, preProcessedData, collate_fn):
         super().__init__()
 
+        self.output_file = config["output_file"]
         self.batch_size = config["batch_size"]
         self.epochs = config["epoch"]
         self.early_stop = config["early_stop"]
@@ -37,7 +38,7 @@ class Train:
         self.concat_validation = ConcatDataset((self.x_validation, self.y_validation))
         self.dataloader_validation = DataLoader(self.concat_validation, batch_size=self.batch_size, collate_fn=collate_fn)
 
-    def doTraining(self, model, model_name, loss_fxn, optimizer, accuracy_fxn, save_file_name=None):
+    def doTraining(self, model, model_name, loss_fxn, optimizer, accuracy_fxn, fp, save_file_name=None):
         model.train()
         early_stop, best_accuracy = 0, 0
         if save_file_name == None:
@@ -60,10 +61,12 @@ class Train:
                     early_stop = 0
                     torch.save(model, model_save_file_name)
                     print(f"epoch: {epoch + 1}\tbatch: {batch_count}\taccuracy: {best_accuracy}")
+                    print(f"epoch: {epoch + 1}\tbatch: {batch_count}\taccuracy: {best_accuracy}", file=fp)
                 else:
                     early_stop += 1
                 if early_stop >= self.early_stop:
                     print("early stop condition met")
+                    print("early stop condition met", file=fp)
                     break
         final_model = torch.load(model_save_file_name)
         accuracy, y_actual, y_pred = accuracy_fxn(final_model, self.dataloader_validation)
