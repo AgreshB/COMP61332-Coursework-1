@@ -10,12 +10,12 @@ class BilstmRandom(BilstmModel):
         self.embedLayer = nn.Embedding(self.vocabulary_size, self.input_size)
         self.embedLayer.weight.requires_grad = self.enable_grad
 
-class BilstmEnsemble(nn.Module):
+class BilstmRandomEnsemble(nn.Module):
     def __init__(self, n_models, input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad=True):
         super().__init__()
         self.n_models = n_models
         self.models = nn.ModuleList([
-            BilstmRandom(input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad=True) for _ in range(self.n_models)])
+            BilstmRandom(input_size, hidden_zie, vocabulary_size, forward_hidden_zie, forward_output_size, enable_grad) for _ in range(self.n_models)])
 
     def forward(self, x, l):
         results = []

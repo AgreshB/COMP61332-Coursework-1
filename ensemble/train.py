@@ -3,7 +3,7 @@ from concat_dataset import ConcatDataset
 from torch.utils.data.dataloader import DataLoader
 
 class Train:
-    def __init__(self, config, preProcessedData, collate_fn):
+    def __init__(self, config, dataset, collate_fn, model_no):
         super().__init__()
 
         self.batch_size = config["batch_size"]
@@ -11,13 +11,12 @@ class Train:
         self.early_stop = config["early_stop"]
 
         # define train test split
-        train_qty = int(0.9 * len(preProcessedData.labels))
-        validation_qty = len(preProcessedData.labels) - train_qty
+        train_qty = int(0.9 * len(dataset))
+        validation_qty = len(dataset) - train_qty
 
-        torch.manual_seed(0)
+        torch.manual_seed(model_no)
 
-        labelled_data = [[s, l] for s,l in zip(preProcessedData.sentence_representation, preProcessedData.label_representation)]
-        train_data, validation_data = torch.utils.data.random_split(labelled_data, [train_qty, validation_qty])
+        train_data, validation_data = torch.utils.data.random_split(dataset, [train_qty, validation_qty])
 
         self.x_train, self.y_train = [], []
 
@@ -40,8 +39,12 @@ class Train:
     def doTraining(self, model, model_name, loss_fxn, optimizer, accuracy_fxn, save_file_name=None):
         model.train()
         early_stop, best_accuracy = 0, 0
+
         if save_file_name == None:
             model_save_file_name = f"data/{model_name}.model"
+        else:
+            model_save_file_name = save_file_name
+
         for epoch in range(self.epochs):
             batch_count = 1
 
