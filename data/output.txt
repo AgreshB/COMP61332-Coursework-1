@@ -1,75 +1,12 @@
-epoch: 1	batch: 2	accuracy: 0.18681318681318682
-epoch: 1	batch: 13	accuracy: 0.20146520146520147
-epoch: 1	batch: 25	accuracy: 0.21978021978021978
-epoch: 2	batch: 3	accuracy: 0.2271062271062271
-epoch: 2	batch: 5	accuracy: 0.23076923076923078
-epoch: 2	batch: 9	accuracy: 0.23443223443223443
-epoch: 2	batch: 10	accuracy: 0.23992673992673993
-epoch: 2	batch: 11	accuracy: 0.25824175824175827
-epoch: 2	batch: 19	accuracy: 0.28205128205128205
-epoch: 2	batch: 23	accuracy: 0.2838827838827839
-epoch: 2	batch: 24	accuracy: 0.2893772893772894
-epoch: 3	batch: 2	accuracy: 0.31135531135531136
-epoch: 3	batch: 10	accuracy: 0.336996336996337
-epoch: 3	batch: 16	accuracy: 0.3498168498168498
-epoch: 3	batch: 17	accuracy: 0.358974358974359
-epoch: 4	batch: 2	accuracy: 0.3608058608058608
-epoch: 4	batch: 6	accuracy: 0.3901098901098901
-epoch: 4	batch: 7	accuracy: 0.39194139194139194
-epoch: 4	batch: 8	accuracy: 0.3974358974358974
-epoch: 4	batch: 9	accuracy: 0.40476190476190477
-epoch: 4	batch: 19	accuracy: 0.41025641025641024
-epoch: 4	batch: 25	accuracy: 0.42857142857142855
-epoch: 4	batch: 26	accuracy: 0.4468864468864469
-epoch: 5	batch: 14	accuracy: 0.4523809523809524
-epoch: 6	batch: 3	accuracy: 0.4542124542124542
-epoch: 6	batch: 5	accuracy: 0.45787545787545786
-epoch: 6	batch: 6	accuracy: 0.4725274725274725
-epoch: 6	batch: 8	accuracy: 0.47435897435897434
-epoch: 6	batch: 9	accuracy: 0.47985347985347987
-epoch: 6	batch: 18	accuracy: 0.48717948717948717
-epoch: 6	batch: 19	accuracy: 0.5018315018315018
-epoch: 7	batch: 2	accuracy: 0.5183150183150184
-epoch: 7	batch: 4	accuracy: 0.5274725274725275
-epoch: 7	batch: 10	accuracy: 0.554945054945055
-epoch: 7	batch: 22	accuracy: 0.5714285714285714
-epoch: 8	batch: 7	accuracy: 0.5897435897435898
-epoch: 8	batch: 19	accuracy: 0.5934065934065934
-epoch: 8	batch: 22	accuracy: 0.6043956043956044
-epoch: 9	batch: 5	accuracy: 0.6245421245421245
-epoch: 9	batch: 10	accuracy: 0.6318681318681318
-epoch: 10	batch: 7	accuracy: 0.6373626373626373
-epoch: 10	batch: 10	accuracy: 0.6465201465201466
-epoch: 11	batch: 3	accuracy: 0.6501831501831502
-epoch: 11	batch: 8	accuracy: 0.6648351648351648
-epoch: 11	batch: 10	accuracy: 0.6666666666666666
-epoch: 11	batch: 22	accuracy: 0.6684981684981685
-epoch: 12	batch: 4	accuracy: 0.6758241758241759
-epoch: 12	batch: 7	accuracy: 0.6776556776556777
-epoch: 12	batch: 8	accuracy: 0.6978021978021978
-epoch: 12	batch: 19	accuracy: 0.6996336996336996
-epoch: 13	batch: 13	accuracy: 0.7087912087912088
-epoch: 14	batch: 6	accuracy: 0.717948717948718
-epoch: 14	batch: 19	accuracy: 0.7252747252747253
-epoch: 15	batch: 8	accuracy: 0.7380952380952381
-epoch: 16	batch: 3	accuracy: 0.73992673992674
-epoch: 16	batch: 10	accuracy: 0.7490842490842491
-epoch: 17	batch: 3	accuracy: 0.7527472527472527
-epoch: 17	batch: 20	accuracy: 0.7545787545787546
-epoch: 18	batch: 8	accuracy: 0.7582417582417582
-epoch: 18	batch: 20	accuracy: 0.7619047619047619
-epoch: 20	batch: 24	accuracy: 0.7673992673992674
-epoch: 21	batch: 16	accuracy: 0.7710622710622711
-epoch: 22	batch: 20	accuracy: 0.7728937728937729
 BiLSTM: Train results:
-Accuracy:  0.7728937728937729
+Accuracy:  0.67
 Confusion Matrix:
- [[14  0  0 ...  0  0  0]
- [ 1  9  0 ...  0  0  0]
- [ 0  0  3 ...  0  0  0]
+ [[0 0 0 ... 0 0 0]
+ [0 3 0 ... 0 0 0]
+ [0 0 6 ... 0 0 0]
  ...
- [ 0  0  0 ...  0  0  0]
- [ 0  0  0 ...  0  0  0]
- [ 0  0  0 ...  0  0 33]]
-Micro F1:  0.7728937728937729
-Macro F1:  0.6797339772157591
+ [0 0 0 ... 2 0 0]
+ [0 0 0 ... 0 2 1]
+ [0 0 0 ... 0 0 2]]
+Micro F1:  0.67
+Macro F1:  0.4612057895159866

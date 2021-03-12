@@ -1,22 +1,4 @@
 import numpy as np
-import torch
-
-# caluclate accuracy of bilstm type models
-def get_accuracy_bilstm(model, loader):
-    y_pred = list()
-    y_actual = list()
-    with torch.no_grad():
-        for x, y, lengths in loader:
-            y_pred.extend(model(x,lengths).argmax(dim=1).numpy().tolist())
-            y_actual.extend(y)
-    return np.sum(np.array(y_pred) == y_actual) / len(y_actual), y_actual, y_pred
-
-# get (test) accuracy of bilstm type models
-def get_accuracy_test(model, model_name, x, y, l):
-    with torch.no_grad():
-        if model_name == "bilstm":
-            y_pred = model(x, l).argmax(dim=1)
-            return np.sum(y_pred.numpy() == y) / len(y), y_pred
 
 # generate a confusion matrix using actual and predicted labels
 def get_confusion_matrix(y_actual, y_pred, size):

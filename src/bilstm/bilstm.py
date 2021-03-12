@@ -1,11 +1,12 @@
 import torch
+import numpy as np
 from classifier import Classifier
 from bilstm.train import Train
 from bilstm.test import Test
 from bilstm.preprocessing import PreProcesseData
 from bilstm.bilstm_random import BilstmRandom, BilstmRandomEnsemble
 from bilstm.bilstm_pretrain import BilstmPretrain, BilstmPretrainEnsemble
-from bilstm.eval import get_accuracy_bilstm, get_confusion_matrix, get_micro_f1, get_macro_f1
+from bilstm.eval import get_confusion_matrix, get_micro_f1, get_macro_f1
 
 
 class BiLSTM(Classifier):
@@ -22,6 +23,15 @@ class BiLSTM(Classifier):
             length.append(len(dataset[0]))
         data = torch.nn.utils.rnn.pad_sequence(data, padding_value=0)
         return data, label, length
+
+    def accuracy_fxn(self, model, loader):
+        y_pred = list()
+        y_actual = list()
+        with torch.no_grad():
+            for x, y, lengths in loader:
+                y_pred.extend(model(x,lengths).argmax(dim=1).numpy().tolist())
+                y_actual.extend(y)
+        return np.sum(np.array(y_pred) == y_actual) / len(y_actual), y_actual, y_pred
 
     def output_results(self, accuracy, confusion_matrix, micro_f1, macro_f1, fp):
         print("BiLSTM: Train results:", file=fp)
@@ -90,7 +100,7 @@ class BiLSTM(Classifier):
 
         print("BiLSTM: Training begun...")
         fp = open(self.config["output_file"], "w")
-        accuracy, y_pred = trainer.doTraining(model=model, model_name="bilstm", loss_fxn=loss_fxn, optimizer=optimizer, accuracy_fxn=get_accuracy_bilstm, save_file_name=save_file_name, fp=fp)
+        accuracy, y_pred = trainer.doTraining(model=model, model_name="bilstm", loss_fxn=loss_fxn, optimizer=optimizer, accuracy_fxn=self.accuracy_fxn, save_file_name=save_file_name, fp=fp)
         confusion_matrix = get_confusion_matrix(trainer.y_validation, y_pred, len(preProcessedData.label_index))
         micro_f1 = get_micro_f1(confusion_matrix)
         macro_f1,f1 = get_macro_f1(confusion_matrix)
@@ -98,16 +108,27 @@ class BiLSTM(Classifier):
         print("BiLSTM: Train results:")
         print("Accuracy: ", accuracy)
         print("Confusion Matrix:\n", confusion_matrix)
-        print("Micro F1: ",micro_f1)
-        print("Macro F1: ",macro_f1)
+        print("Micro F1: ", micro_f1)
+        print("Macro F1: ", macro_f1)
         self.output_results(accuracy, confusion_matrix, micro_f1, macro_f1, fp)
         self.model = model
         fp.close()
 
     def test(self):
+        print("BiLSTM: Testing begun...")
+        fp = open(self.config["output_file"], "w")
         preProcessedData = PreProcesseData(file_path=self.config["path_test"], pre_train_file_path=self.config["path_pre_emb"], unk_token=self.config["unk_token"], is_train=False)
         model = torch.load(self.config["model_path"])
         tester = Test(preProcessedData=preProcessedData, model=model, model_type="bilstm")
         accuracy, y_pred = tester.doTesting()
+        confusion_matrix = get_confusion_matrix(tester.y_actual, y_pred, len(preProcessedData.label_index))
+        micro_f1 = get_micro_f1(confusion_matrix)
+        macro_f1,f1 = get_macro_f1(confusion_matrix)
+        print("BiLSTM: Testing complete!")
         print("BiLSTM: Test results:")
         print("Accuracy: ", accuracy)
+        print("Confusion Matrix:\n", confusion_matrix)
+        print("Micro F1: ", micro_f1)
+        print("Macro F1: ", macro_f1)
+        self.output_results(accuracy, confusion_matrix, micro_f1, macro_f1, fp)
+        fp.close()
