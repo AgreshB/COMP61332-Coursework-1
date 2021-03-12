@@ -1,69 +1,79 @@
 import numpy as np
 import torch
 
-def get_accuracy_bilstm(model,loader):
-    y_preds = list()
-    y_real = list()
+# caluclate accuracy of bilstm type models
+def get_accuracy_bilstm(model, loader):
+    y_pred = list()
+    y_actual = list()
     with torch.no_grad():
         for x, y, lengths in loader:
-            y_preds.extend(model(x,lengths).argmax(dim=1).numpy().tolist())
-            y_real.extend(y)
-    return np.sum(np.array(y_preds)==y_real)/len(y_real),y_real,y_preds
+            y_pred.extend(model(x,lengths).argmax(dim=1).numpy().tolist())
+            y_actual.extend(y)
+    return np.sum(np.array(y_pred) == y_actual) / len(y_actual), y_actual, y_pred
 
-def get_accuracy_test(model,model_type,x,y,lengths):
+# get (test) accuracy of bilstm type models
+def get_accuracy_test(model, model_name, x, y, l):
     with torch.no_grad():
-        if model_type=='bow':
-            y_preds = model(x).argmax(dim=1)
-            return np.sum(y_preds.numpy()==y)/len(y),y_preds
-        if model_type=='bilstm':
-            y_preds = model(x,lengths).argmax(dim=1)
-            return np.sum(y_preds.numpy()==y)/len(y),y_preds
-        if model_type=='bow_bilstm':
-            y_preds = model(x,lengths).argmax(dim=1)
-            return np.sum(y_preds.numpy()==y)/len(y),y_preds
+        if model_name == "bilstm":
+            y_pred = model(x, l).argmax(dim=1)
+            return np.sum(y_pred.numpy() == y) / len(y), y_pred
 
-def get_confusion_matrix(y_real,y_preds,size):
-    mat = np.zeros( (size,size) , dtype=np.dtype(np.int32))
-    for i in range(len(y_real)):
-        if y_real[i]==y_preds[i]:
-            mat[y_real[i]-1][y_real[i]-1] += 1
+# generate a confusion matrix using actual and predicted labels
+def get_confusion_matrix(y_actual, y_pred, size):
+    matrix = np.zeros((size, size) , dtype=np.dtype(np.int32))
+    for i in range(0, len(y_actual)):
+        if y_actual[i] == y_pred[i]:
+            matrix[y_actual[i] - 1][y_actual[i] - 1] += 1
         else:
-            mat[y_real[i]-1][y_preds[i]-1] += 1
-    return mat
+            matrix[y_actual[i] - 1][y_pred[i] - 1] += 1
+    return matrix
 
-def get_micro_f1(conf_mat):
-    mat = np.array(conf_mat)
-    tp,fp,fn = list(),list(),list()
-    for i in range(np.size(mat,0)):
-        tp.append(mat[i][i])
-        fp.append(np.sum(mat[:][i]) - mat[i][i] )
-        fn.append(np.sum(mat[i][:]) - mat[i][i] )
+# caluclate micro f1 score using confusion matrix
+def get_micro_f1(confusion_matrix):
+    matrix = np.array(confusion_matrix)
+    tp, fp, fn = [], [], []
+
+    for i in range(0, np.size(matrix, 0)):
+        tp.append(matrix[i][i])
+        fp.append(np.sum(matrix[:][i]) - matrix[i][i])
+        fn.append(np.sum(matrix[i][:]) - matrix[i][i])
+
     tp_sum = np.sum(np.array(tp))
     fp_sum = np.sum(np.array(fp))
     fn_sum = np.sum(np.array(fn))
-    precision = tp_sum/(tp_sum+fp_sum)
-    recall = tp_sum/(tp_sum+fn_sum)
-    return 2*precision*recall/(precision+recall)
 
-def get_macro_f1(conf_mat):
-    mat = np.array(conf_mat)
-    precision,recall = list(),list()
-    f1 = list()
-    for i in range(np.size(mat,0)):
-        tp=mat[i][i]
-        fp=np.sum(mat[:][i]) - mat[i][i]
-        fn=np.sum(mat[i][:]) - mat[i][i]
-        p,r=0,0
-        if tp!=0 or fp!=0:
-            p=tp/(tp+fp)
-            precision.append(tp/(tp+fp))
-        if tp!=0 or fn!=0:
-            r=tp/(tp+fn)
-            recall.append(tp/(tp+fn))
-        if p!=0 or r!=0:
-            f1.append(2*p*r/(p+r))
+    precision = tp_sum / (tp_sum + fp_sum)
+    recall = tp_sum / (tp_sum + fn_sum)
+    return 2 * precision * recall / (precision + recall)
+
+# calculate macro f1 using confusion matrix
+def get_macro_f1(confusion_matrix):
+    matrix = np.array(confusion_matrix)
+    precision, recall = [], []
+    f1 = []
+
+    for i in range(0, np.size(matrix,0)):
+        tp=matrix[i][i]
+
+        fp = np.sum(matrix[:][i]) - matrix[i][i]
+        fn = np.sum(matrix[i][:]) - matrix[i][i]
+
+        p, r = 0, 0
+
+        if tp != 0 or fp != 0:
+            p = tp / (tp + fp)
+            precision.append(tp / (tp + fp))
+
+        if tp != 0 or fn != 0:
+            r = tp / (tp + fn)
+            recall.append(tp / (tp + fn))
+
+        if p != 0 or r != 0:
+            f1.append(2 * p * r / (p + r))
         else:
             f1.append(0)
-    pre_avg = np.mean(np.array(precision))
-    rec_avg = np.mean(np.array(recall))
-    return 2*pre_avg*rec_avg/(pre_avg+rec_avg),f1
+
+    precision_avg = np.mean(np.array(precision))
+    recall_avg = np.mean(np.array(recall))
+
+    return 2 * precision_avg * recall_avg / (precision_avg + recall_avg), f1
