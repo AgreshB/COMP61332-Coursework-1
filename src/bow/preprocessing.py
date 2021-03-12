@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # creating list of stop words from Stop_words.txt
 STOP_WORDS = []
-with open("../res/stop_words.txt") as f:
+with open("../data/stop_words.txt") as f:
     for line in f:
         STOP_WORDS.append(line.strip())
 
