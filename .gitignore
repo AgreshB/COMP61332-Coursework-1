@@ -43,11 +43,14 @@ debugpy*.log
 pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
-test.py
 data/glove.txt
+glove.small
+output.txt
 bilstm.config
 
 *.bin
 *.model
 *.dvoc
 *.lvoc
+
+__pycache__

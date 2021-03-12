@@ -1,8 +1,6 @@
 # COMP61332-Coursework-1
 
-## LSTM
-
-### python setup
+## python setup
 - the following steps ensure everyone runs the versions of the packages being used
 - use python3+
 - install pip (https://pypi.org/project/pip/)
@@ -13,19 +11,18 @@
 - run `pip install -r requirements.txt`
 - whenever you install a pip package, remember to run `pip freeze > requirements.txt`
 
+## running 
+- `cd src` to go to the directory containg all the code
+- make sure you are in the src directory before training/testing
 
-### BiLSTM training (for development)
-- open bilstm.py
-- configure/change the config dictionary as needed
-- call `train` fxn of object bilstm_classifier (last line), ie, `bilstm_classifier.train()`
-- run `python bilstm.py`
+### training
+- `python question_classifier.py --train -c ../data/<config_file_name>.ini` 
+- example, `python question_classifier.py --train -c ../data/bilstm.ini` 
 
-### BiLSTM testing (for development)
-- open bilstm.py
-- configure/change the config dictionary as needed
-- call `test` fxn of object bilstm_classifier (last line), ie, `bilstm_classifier.test()`
-- run `python bilstm.py`
+### testing
+- `python question_classifier.py --test -c ../data/<config_file_name>.ini` 
+- example, `python question_classifier.py --test -c ../data/bilstm.ini` 
 
 ### TODO
-- load config from config file
-- metrics (f1 score, confusion matrix)
+- ~~load config from config file~~
+- ~~metrics (f1 score, confusion matrix)~~
