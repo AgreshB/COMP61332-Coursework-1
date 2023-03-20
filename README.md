@@ -1,4 +1,4 @@
-# COMP61332-Coursework-1
+# Text Mining Classification
 
 ## LSTM
 
